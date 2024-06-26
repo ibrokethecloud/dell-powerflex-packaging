@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dell-powerflex-runtime
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: dell-powerflex-runtime
+  namespace: harvester-system
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: dell-powerflex-daemonset
+      app.kubernetes.io/instance: dell-powerflex-toolkit
+      app.kubernetes.io/name: dell-powerflex-runtime
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: dell-powerflex-daemonset
+        app.kubernetes.io/instance: dell-powerflex-toolkit
+        app.kubernetes.io/name: dell-powerflex-runtime
+    spec:
+      containers:
+      - env:
+        - name: DRIVER_LOCATION
+          value: http://172.19.96.23/iso/rpms/EMC-ScaleIO-sdc-4.5-2000.135.sles15.4.x86_64.rpm
+        image: gmehta3/scaleio:latest
+        imagePullPolicy: Always
+        name: dell-powerflex-ctr
+        resources: {}
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/log
+          name: var-log
+        - mountPath: /dev/log
+          name: dev-log
+        - mountPath: /host-etc/os-release
+          name: host-os-release
+          readOnly: true
+        - mountPath: /sys
+          name: host-sys
+      dnsPolicy: ClusterFirst
+      hostPID: true
+      nodeSelector:
+        sriovgpu.harvesterhci.io/driver-needed: "true"
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: dell-powerflex-runtime
+      serviceAccountName: dell-powerflex-runtime
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: /var/log
+          type: ""
+        name: var-log
+      - hostPath:
+          path: /dev/log
+          type: ""
+        name: dev-log
+      - hostPath:
+          path: /etc/os-release
+          type: ""
+        name: host-os-release
+      - hostPath:
+          path: /sys
+          type: Directory
+        name: host-sys
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
