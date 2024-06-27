@@ -47,8 +47,6 @@ spec:
           name: host-sys
       dnsPolicy: ClusterFirst
       hostPID: true
-      nodeSelector:
-        sriovgpu.harvesterhci.io/driver-needed: "true"
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
