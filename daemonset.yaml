@@ -45,6 +45,12 @@ spec:
           readOnly: true
         - mountPath: /sys
           name: host-sys
+        - mountPath: /etc/emc
+          name: etc-emc
+        - mountPath: /bin/emc
+          name: bin-emc
+        - mountPath: /etc/udev/rules.d
+          name: host-udev
       dnsPolicy: ClusterFirst
       hostPID: true
       restartPolicy: Always
@@ -70,6 +76,18 @@ spec:
           path: /sys
           type: Directory
         name: host-sys
+      - hostPath:
+          path: /etc/emc
+          type: DirectoryOrCreate
+        name: etc-emc
+      - hostPath:
+          path: /bin/emc
+          type: DirectoryOrCreate
+        name: bin-emc 
+      - hostPath:
+          path: /etc/udev/rules.d
+          type: Directory
+        name: host-udev   
   updateStrategy:
     rollingUpdate:
       maxSurge: 0
